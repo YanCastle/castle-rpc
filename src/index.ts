@@ -28,22 +28,23 @@ export class RPC {
         let From = this.From.length > 8 ? this.From.substr(0, 8) : this.From.padEnd(8, ' ')
         let To = this.To.length > 8 ? this.To.substr(0, 8) : this.To.padEnd(8, ' ')
         //预留7个字节
-        let b = Buffer.alloc(19)
+        let b = Buffer.alloc(20)
         b[0] |= this.NeedReply ? 0x80 : 0x00
         b[0] |= this.Status ? 0x40 : 0x00
         b[0] |= this.Timeout
         b[1] = this.ID
+        b.writeUInt16BE(this.ID, 1)
         // b[2] |= this.IsUp ? 0x80 : 0x00;
-        b[2] = this.Path.length
+        b[3] = this.Path.length
         let type = getDataType(this.Data);
-        b[2] |= (type << 5)
+        b[3] |= (type << 5)
         //开始编码时间和请求类型数据
         let sTime = this.Time.toString();
-        b[3] = this.Type
-        b[4] = Number(sTime.substr(0, 1))
+        b[4] = this.Type
+        b[5] = Number(sTime.substr(0, 1))
 
         for (let i = 0; i < 6; i++) {
-            b[i + 5] = Number(sTime.toString().substr(i * 2 + 1, 2))
+            b[i + 6] = Number(sTime.toString().substr(i * 2 + 1, 2))
         }
 
         // 需要标识数据类型用于做解码
@@ -71,26 +72,26 @@ export class RPC {
         t.NeedReply = (b[0] & 0x80) == 0x80
         t.Status = (b[0] & 0x40) == 0x40
         t.Timeout = (b[0] & 0x3F)
-        t.ID = b[1]
+        t.ID = b.readUInt16BE(1)
         // t.IsUp = (b[2] & 0x80) == 0x00
-        let c = b[2]
+        let c = b[3]
         let dt = c >> 5
         let len = c & 0x1F
 
-        t.Type = b[3]
+        t.Type = b[4]
         let tTime: number[] = [
-            b[4] & 0xF
+            b[5] & 0xF
         ];
         for (let i = 0; i < 6; i++) {
-            tTime.push(b[i + 5])
+            tTime.push(b[i + 6])
         }
 
         t.Time = Number(tTime.join(''))
-        t.From = b.slice(19, 19 + 8).toString().trim()
-        t.To = b.slice(19 + 8, 19 + 8 + 8).toString().trim()
+        t.From = b.slice(20, 20 + 8).toString().trim()
+        t.To = b.slice(20 + 8, 20 + 8 + 8).toString().trim()
         //预留7个字节不处理
-        t.Path = b.slice(35, len + 35).toString()
-        t.Data = b.slice(35 + len)
+        t.Path = b.slice(36, len + 36).toString()
+        t.Data = b.slice(36 + len)
         switch (dt) {
             case DataType.JSON:
                 t.Data = JSON.parse(t.Data.toString())
