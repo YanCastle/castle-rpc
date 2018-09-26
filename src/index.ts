@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer'
+
 export class RPC {
     //来源 8 字节
     From: string | any = "";

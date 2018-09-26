@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
-        "target": "es2018",
+        "module": "amd",
+        "target": "ts6",
         "sourceMap": true,
-        "outDir": "../dist",
+        "outDir": "../dist/amd",
         // "outDir": "D:/Project/layimServer/node_modules/castle-koa/dist",
         "declaration": true,
         "experimentalDecorators": true,
