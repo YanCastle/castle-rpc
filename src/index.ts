@@ -58,8 +58,10 @@ export class RPC {
         return Buffer.concat([
             Buffer.from([0x68]),
             b,
-            this.Type == RPCType.Proxy ? Buffer.from(From) : Buffer.alloc(0),
-            this.Type == RPCType.Proxy ? Buffer.from(To) : Buffer.alloc(0),
+            // this.Type == RPCType.Proxy ? Buffer.from(From) : Buffer.alloc(0),
+            // this.Type == RPCType.Proxy ? Buffer.from(To) : Buffer.alloc(0),
+            Buffer.from(From),
+            Buffer.from(To),
             Buffer.from(this.Path),
             Buffer.from(data),
             Buffer.from([0x68]),
@@ -88,11 +90,11 @@ export class RPC {
 
         t.Time = Number(tTime.join(''))
         let start = 20;
-        if (t.Type == RPCType.Proxy) {
-            t.From = b.slice(20, 20 + 8).toString().trim()
-            t.To = b.slice(20 + 8, 20 + 8 + 8).toString().trim()
-            start = 36;
-        }
+        // if (t.Type == RPCType.Proxy) {
+        t.From = b.slice(20, 20 + 8).toString().trim()
+        t.To = b.slice(20 + 8, 20 + 8 + 8).toString().trim()
+        start = 36;
+        // }
         //预留7个字节不处理
         t.Path = b.slice(start, len + start).toString()
         t.Data = b.slice(start + len)
