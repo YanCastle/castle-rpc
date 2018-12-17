@@ -1,4 +1,3 @@
-
 export class RPC {
     //来源 8 字节
     From: string | any = "";
@@ -54,12 +53,13 @@ export class RPC {
         } else if (DataType.Boolean == type) {
             data = data ? 1 : 0
         }
+        let nb = NeedAddressType.indexOf(this.Type) > -1
         data = data.toString()
         return Buffer.concat([
             Buffer.from([0x68]),
             b,
-            this.Type == RPCType.Proxy ? Buffer.from(From) : Buffer.alloc(0),
-            this.Type == RPCType.Proxy ? Buffer.from(To) : Buffer.alloc(0),
+            nb ? Buffer.from(From) : Buffer.alloc(0),
+            nb ? Buffer.from(To) : Buffer.alloc(0),
             // Buffer.from(From),
             // Buffer.from(To),
             Buffer.from(this.Path),
@@ -90,7 +90,7 @@ export class RPC {
 
         t.Time = Number(tTime.join(''))
         let start = 20;
-        if (t.Type == RPCType.Proxy) {
+        if (NeedAddressType.indexOf(t.Type) > -1) {
             t.From = b.slice(20, 20 + 8).toString().trim()
             t.To = b.slice(20 + 8, 20 + 8 + 8).toString().trim()
             start = 36;
@@ -142,6 +142,7 @@ export enum RPCType {
     //取消订阅
     UnSub,
 }
+export const NeedAddressType = [RPCType.Login, RPCType.Proxy, RPCType.Move];
 export enum TimeoutUnit {
     s, m
 }
